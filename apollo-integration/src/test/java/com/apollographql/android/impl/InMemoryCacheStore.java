@@ -5,6 +5,8 @@ import com.apollographql.android.cache.normalized.Record;
 import com.apollographql.android.cache.normalized.RecordSet;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public final class InMemoryCacheStore extends CacheStore {
 
@@ -18,8 +20,16 @@ public final class InMemoryCacheStore extends CacheStore {
     return recordSet.get(key);
   }
 
-  @Override public synchronized void merge(Record apolloRecord) {
-    recordSet.merge(apolloRecord);
+  @Override public synchronized Set<String> merge(Record apolloRecord) {
+    return recordSet.merge(apolloRecord);
+  }
+
+  @Override public Set<String> merge(Collection<Record> recordSet) {
+    Set<String> changedKeys = new LinkedHashSet<>();
+    for (Record record: recordSet) {
+      changedKeys.addAll(merge(record));
+    }
+    return changedKeys;
   }
 
   public Collection<Record> allRecords() {
