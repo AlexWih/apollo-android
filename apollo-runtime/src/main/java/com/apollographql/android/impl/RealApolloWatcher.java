@@ -1,6 +1,7 @@
 package com.apollographql.android.impl;
 
 import com.apollographql.android.ApolloCall;
+import com.apollographql.android.ApolloWatcher;
 import com.apollographql.android.api.graphql.Operation;
 import com.apollographql.android.api.graphql.Response;
 import com.apollographql.android.cache.normalized.Cache;
@@ -10,7 +11,7 @@ import com.apollographql.android.impl.util.Utils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RealApolloWatcher<T extends Operation.Data> {
+public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatcher<T> {
 
   private RealApolloCall<T> activeCall;
   @Nullable private ApolloCall.Callback<T> callback = null;
@@ -59,7 +60,7 @@ public class RealApolloWatcher<T extends Operation.Data> {
   }
 
   @Nonnull public RealApolloWatcher<T> refetch() {
-    activeCall.cancel(); //Todo: is this necessary / good?
+    activeCall.cancel(); //Todo: is this necessary / good? We don't want people to chain refetch().refetch()
     activeCall = activeCall.clone().cacheControl(refetchCacheControl);
     fetch();
     return this;

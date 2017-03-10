@@ -54,7 +54,7 @@ final class SqlStore extends CacheStore {
       oldRecord.mergeWith(apolloRecord);
       updateRecord(oldRecord.key(), parser.toJson(oldRecord.fields()));
     }
-    return new HashSet<>(); //TODO // FIXME: 3/9/17 
+    return new HashSet<>(); //TODO // FIXME: 3/9/17 Return something real
   }
 
   long createRecord(String key, String fields) {
