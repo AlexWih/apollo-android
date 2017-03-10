@@ -26,7 +26,6 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
   private Cache.RecordChangeSubscriber recordChangeSubscriber = new Cache.RecordChangeSubscriber() {
     @Override public void onDependentKeyChanged() {
       refetch();
-      cache.unsubscribe(this);
     }
   };
 
@@ -62,6 +61,7 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
   @Nonnull public RealApolloWatcher<T> refetch() {
     activeCall.cancel(); //Todo: is this necessary / good? We don't want people to chain refetch().refetch()
     activeCall = activeCall.clone().cacheControl(refetchCacheControl);
+    cache.unsubscribe(recordChangeSubscriber);
     fetch();
     return this;
   }
