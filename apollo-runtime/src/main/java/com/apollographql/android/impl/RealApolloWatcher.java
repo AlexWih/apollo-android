@@ -17,24 +17,34 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
   @Nullable private ApolloCall.Callback<T> callback = null;
   private final Cache cache;
   private CacheControl refetchCacheControl = CacheControl.CACHE_FIRST;
+  private Cache.RecordChangeSubscriber recordChangeSubscriber = new Cache.RecordChangeSubscriber() {
+    @Override public void onDependentKeysChanged() {
+      refetch();
+    }
+  };
+  private volatile boolean isSubscribed = true;
+
+  private WatcherSubscription watcherSubscription = new WatcherSubscription() {
+    @Override public void unsubscribe() {
+      isSubscribed = false;
+      cache.unsubscribe(recordChangeSubscriber);
+    }
+  };
 
   public RealApolloWatcher(RealApolloCall<T> originalCall, Cache cache) {
     activeCall = originalCall;
     this.cache = cache;
   }
 
-  private Cache.RecordChangeSubscriber recordChangeSubscriber = new Cache.RecordChangeSubscriber() {
-    @Override public void onDependentKeysChanged() {
-      refetch();
-    }
-  };
 
   private ApolloCall.Callback<T> callbackProxy(final ApolloCall.Callback<T> sourceCallback,
       final RealApolloCall<T> call) {
     return new ApolloCall.Callback<T>() {
       @Override public void onResponse(@Nonnull Response<T> response) {
         sourceCallback.onResponse(response);
-        cache.subscribe(recordChangeSubscriber, call.dependentKeys());
+        if (isSubscribed) {
+          cache.subscribe(recordChangeSubscriber, call.dependentKeys());
+        }
       }
 
       @Override public void onFailure(@Nonnull Exception e) {
@@ -47,9 +57,10 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
     cache.unsubscribe(recordChangeSubscriber);
   }
 
-  public void enqueueAndWatch(@Nullable final ApolloCall.Callback<T> callback) {
+  public WatcherSubscription enqueueAndWatch(@Nullable final ApolloCall.Callback<T> callback) {
     this.callback = callback;
     fetch();
+    return watcherSubscription;
   }
 
   @Nonnull public RealApolloWatcher<T> refetchCacheControl(@Nonnull CacheControl cacheControl) {

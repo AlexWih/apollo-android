@@ -17,7 +17,7 @@ public interface ApolloCall<T extends Operation.Data> {
 
   @Nonnull void enqueue(@Nullable Callback<T> callback);
 
-  @Nonnull RealApolloWatcher toWatcher(); //todo: change from real to base watcher
+  @Nonnull RealApolloWatcher<T> toWatcher(); //todo: change from real to base watcher
 
   @Nonnull ApolloCall<T> httpCacheControl(@Nonnull HttpCacheControl httpCacheControl);
 

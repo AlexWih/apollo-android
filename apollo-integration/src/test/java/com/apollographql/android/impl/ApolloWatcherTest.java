@@ -3,6 +3,7 @@ package com.apollographql.android.impl;
 import android.support.annotation.NonNull;
 
 import com.apollographql.android.ApolloCall;
+import com.apollographql.android.ApolloWatcher;
 import com.apollographql.android.CustomTypeAdapter;
 import com.apollographql.android.api.graphql.Response;
 import com.apollographql.android.cache.normalized.CacheControl;
@@ -82,17 +83,16 @@ public class ApolloWatcherTest {
 
     final CountDownLatch firstResponseLatch = new CountDownLatch(1);
     final CountDownLatch secondResponseLatch = new CountDownLatch(2);
-    apolloClient.newCall(query).toWatcher().enqueueAndWatch(new ApolloCall.Callback<EpisodeHeroName.Data>() {
+    ApolloWatcher<EpisodeHeroName.Data> watcher = apolloClient.newCall(query).toWatcher();
+    final ApolloWatcher.WatcherSubscription watcherSubscription = watcher.enqueueAndWatch(new ApolloCall.Callback<EpisodeHeroName.Data>() {
       @Override public void onResponse(@Nonnull Response<EpisodeHeroName.Data> response) {
         if (secondResponseLatch.getCount() == 2) {
           assertThat(response.data().hero().name()).isEqualTo("R2-D2");
-        }
-        else if (secondResponseLatch.getCount() == 1) {
+        } else if (secondResponseLatch.getCount() == 1) {
           assertThat(response.data().hero().name()).isEqualTo("Artoo");
         }
         firstResponseLatch.countDown();
         secondResponseLatch.countDown();
-
       }
 
       @Override public void onFailure(@Nonnull Exception e) {
@@ -105,9 +105,8 @@ public class ApolloWatcherTest {
     firstResponseLatch.await(); // add timeout ?
     server.enqueue(mockResponse("HeroNameResponseNameChange.json"));
     apolloClient.newCall(query).cacheControl(CacheControl.NETWORK_ONLY).enqueue(null); //Another newer call gets
-    // different data
-
     secondResponseLatch.await(); // add tiemout?
+    watcherSubscription.unsubscribe();
   }
 
   private MockResponse mockResponse(String fileName) throws IOException {
