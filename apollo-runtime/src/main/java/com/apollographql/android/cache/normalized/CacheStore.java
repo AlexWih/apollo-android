@@ -23,17 +23,8 @@ public abstract class CacheStore {
     return records;
   }
 
-  /**
-   *
-   * @param object
-   * @return a set of changed keys
-   */
   public abstract Set<String> merge(Record object);
 
-  /**
-   * @param recordSet
-   * @return A set of change keys
-   */
   public Set<String> merge(Collection<Record> recordSet) {
     Set<String> aggregatedDependentKeys = new HashSet<>();
     for (Record record : recordSet) {

@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Nonnull;
 
@@ -18,7 +16,6 @@ public final class RealCache implements Cache {
   private final CacheStore cacheStore;
   private final CacheKeyResolver cacheKeyResolver;
   private Map<RecordChangeSubscriber, Set<String>> subscribers;
-  ExecutorService storeWriterThread = Executors.newSingleThreadExecutor();
 
   public RealCache(@Nonnull CacheStore cacheStore, @Nonnull CacheKeyResolver cacheKeyResolver) {
     this.cacheStore = cacheStore;
@@ -26,11 +23,11 @@ public final class RealCache implements Cache {
     this.subscribers = new LinkedHashMap<>();
   }
 
-  @Override public synchronized void subscribe(RecordChangeSubscriber subscriber, Set<String> dependentKeys) {
+  @Override public void subscribe(RecordChangeSubscriber subscriber, Set<String> dependentKeys) {
     subscribers.put(subscriber, dependentKeys);
   }
 
-  @Override public synchronized void unsubscribe(RecordChangeSubscriber subscriber) {
+  @Override public void unsubscribe(RecordChangeSubscriber subscriber) {
     subscribers.remove(subscriber);
   }
 
@@ -38,20 +35,15 @@ public final class RealCache implements Cache {
     return new ResponseNormalizer(cacheKeyResolver);
   }
 
+  //Todo: Add proper threading model to RealCache (this should be done on different thread)
   @Override public void write(@Nonnull final Collection<Record> recordSet) {
-    storeWriterThread.submit(new Runnable() {
-      @Override public void run() {
-        final Set<String> changedKeys = cacheStore.merge(checkNotNull(recordSet, "recordSet == null"));
-        synchronized (this) {
-          Map<RecordChangeSubscriber, Set<String>> iterableSubscribers = new LinkedHashMap<>(subscribers);
-          for (Map.Entry<RecordChangeSubscriber, Set<String>> subscriberEntry: iterableSubscribers.entrySet()) {
-            if (!Utils.areDisjoint(subscriberEntry.getValue(), changedKeys)) {
-              subscriberEntry.getKey().onDependentKeyChanged();
-            }
-          }
-        }
+    final Set<String> changedKeys = cacheStore.merge(checkNotNull(recordSet, "recordSet == null"));
+    Map<RecordChangeSubscriber, Set<String>> iterableSubscribers = new LinkedHashMap<>(subscribers);
+    for (Map.Entry<RecordChangeSubscriber, Set<String>> subscriberEntry : iterableSubscribers.entrySet()) {
+      if (!Utils.areDisjoint(subscriberEntry.getValue(), changedKeys)) {
+        subscriberEntry.getKey().onDependentKeysChanged();
       }
-    });
+    }
   }
 
   @Override public Record read(@Nonnull String key) {

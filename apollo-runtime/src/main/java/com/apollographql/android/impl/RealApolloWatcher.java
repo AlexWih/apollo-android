@@ -24,7 +24,7 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
   }
 
   private Cache.RecordChangeSubscriber recordChangeSubscriber = new Cache.RecordChangeSubscriber() {
-    @Override public void onDependentKeyChanged() {
+    @Override public void onDependentKeysChanged() {
       refetch();
     }
   };

@@ -13,7 +13,7 @@ public interface ApolloWatcher<T extends Operation.Data> {
 
   void stopWatching();
 
-  @Nonnull public RealApolloWatcher<T> refetchCacheControl(@Nonnull CacheControl cacheControl);
+  @Nonnull RealApolloWatcher<T> refetchCacheControl(@Nonnull CacheControl cacheControl);
 
-  @Nonnull public RealApolloWatcher<T> refetch();
+  @Nonnull RealApolloWatcher<T> refetch();
 }

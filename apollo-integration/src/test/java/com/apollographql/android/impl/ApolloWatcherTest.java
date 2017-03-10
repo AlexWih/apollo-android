@@ -102,12 +102,12 @@ public class ApolloWatcherTest {
       }
     });
 
-    firstResponseLatch.await(); // add delay ?
+    firstResponseLatch.await(); // add timeout ?
     server.enqueue(mockResponse("HeroNameResponseNameChange.json"));
     apolloClient.newCall(query).cacheControl(CacheControl.NETWORK_ONLY).enqueue(null); //Another newer call gets
     // different data
 
-    secondResponseLatch.await(); // add delay?
+    secondResponseLatch.await(); // add tiemout?
   }
 
   private MockResponse mockResponse(String fileName) throws IOException {

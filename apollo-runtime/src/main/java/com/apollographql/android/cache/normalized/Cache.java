@@ -12,7 +12,7 @@ public interface Cache {
     /**
      * @return Whether or not to keep the subscription active.
      */
-     void onDependentKeyChanged();
+     void onDependentKeysChanged();
   }
 
   void subscribe(RecordChangeSubscriber subscriber, Set<String> dependentKeys);

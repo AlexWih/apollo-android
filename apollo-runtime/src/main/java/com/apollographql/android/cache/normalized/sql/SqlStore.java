@@ -42,11 +42,11 @@ final class SqlStore extends CacheStore {
     sqLiteStatement = database.compileStatement(INSERT_STATEMENT);
   }
 
-  @Nullable @Override public Record loadRecord(String key) {
+  @Nullable public Record loadRecord(String key) {
     return selectRecordForKey(key);
   }
 
-  @Override public Set<String> merge(Record apolloRecord) {
+  public Set<String> merge(Record apolloRecord) {
     Record oldRecord = selectRecordForKey(apolloRecord.key());
     if (oldRecord == null) {
       createRecord(apolloRecord.key(), parser.toJson(apolloRecord.fields()));
