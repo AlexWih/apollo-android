@@ -50,7 +50,7 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
     this.cache = cache;
   }
 
-  public WatcherSubscription enqueueAndWatch(@Nullable final ApolloCall.Callback<T> callback) {
+  @Nonnull public WatcherSubscription enqueueAndWatch(@Nullable final ApolloCall.Callback<T> callback) {
     this.callback = callback;
     fetch();
     return watcherSubscription;

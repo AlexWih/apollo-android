@@ -4,10 +4,8 @@ import com.apollographql.android.cache.normalized.CacheStore;
 import com.apollographql.android.cache.normalized.Record;
 import com.apollographql.android.cache.normalized.RecordSet;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class InMemoryCacheStore extends CacheStore {
@@ -24,17 +22,6 @@ public final class InMemoryCacheStore extends CacheStore {
 
   public synchronized Set<String> merge(Record apolloRecord) {
     return recordSet.merge(apolloRecord);
-  }
-
-  @Override public Collection<Record> loadRecords(Collection<String> keys) {
-    List<Record> records = new ArrayList<>(keys.size());
-    for (String key : keys) {
-      final Record record = loadRecord(key);
-      if (record != null) {
-        records.add(record);
-      }
-    }
-    return records;
   }
 
   @Override public Set<String> merge(Collection<Record> recordSet) {
