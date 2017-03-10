@@ -17,27 +17,19 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
   @Nullable private ApolloCall.Callback<T> callback = null;
   private final Cache cache;
   private CacheControl refetchCacheControl = CacheControl.CACHE_FIRST;
-  private Cache.RecordChangeSubscriber recordChangeSubscriber = new Cache.RecordChangeSubscriber() {
+  private volatile boolean isSubscribed = true;
+  private final Cache.RecordChangeSubscriber recordChangeSubscriber = new Cache.RecordChangeSubscriber() {
     @Override public void onDependentKeysChanged() {
       refetch();
     }
   };
-  private volatile boolean isSubscribed = true;
-
-  private WatcherSubscription watcherSubscription = new WatcherSubscription() {
+  private final WatcherSubscription watcherSubscription = new WatcherSubscription() {
     @Override public void unsubscribe() {
       isSubscribed = false;
       cache.unsubscribe(recordChangeSubscriber);
     }
   };
-
-  public RealApolloWatcher(RealApolloCall<T> originalCall, Cache cache) {
-    activeCall = originalCall;
-    this.cache = cache;
-  }
-
-
-  private ApolloCall.Callback<T> callbackProxy(final ApolloCall.Callback<T> sourceCallback,
+  private final ApolloCall.Callback<T> callbackProxy(final ApolloCall.Callback<T> sourceCallback,
       final RealApolloCall<T> call) {
     return new ApolloCall.Callback<T>() {
       @Override public void onResponse(@Nonnull Response<T> response) {
@@ -53,8 +45,9 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
     };
   }
 
-  public void stopWatching() {
-    cache.unsubscribe(recordChangeSubscriber);
+  public RealApolloWatcher(RealApolloCall<T> originalCall, Cache cache) {
+    activeCall = originalCall;
+    this.cache = cache;
   }
 
   public WatcherSubscription enqueueAndWatch(@Nullable final ApolloCall.Callback<T> callback) {
