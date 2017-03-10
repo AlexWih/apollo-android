@@ -29,21 +29,6 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
       cache.unsubscribe(recordChangeSubscriber);
     }
   };
-  private final ApolloCall.Callback<T> callbackProxy(final ApolloCall.Callback<T> sourceCallback,
-      final RealApolloCall<T> call) {
-    return new ApolloCall.Callback<T>() {
-      @Override public void onResponse(@Nonnull Response<T> response) {
-        sourceCallback.onResponse(response);
-        if (isSubscribed) {
-          cache.subscribe(recordChangeSubscriber, call.dependentKeys());
-        }
-      }
-
-      @Override public void onFailure(@Nonnull Exception e) {
-        sourceCallback.onFailure(e);
-      }
-    };
-  }
 
   public RealApolloWatcher(RealApolloCall<T> originalCall, Cache cache) {
     activeCall = originalCall;
@@ -68,6 +53,22 @@ public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatche
     cache.unsubscribe(recordChangeSubscriber);
     fetch();
     return this;
+  }
+
+  private ApolloCall.Callback<T> callbackProxy(final ApolloCall.Callback<T> sourceCallback,
+      final RealApolloCall<T> call) {
+    return new ApolloCall.Callback<T>() {
+      @Override public void onResponse(@Nonnull Response<T> response) {
+        sourceCallback.onResponse(response);
+        if (isSubscribed) {
+          cache.subscribe(recordChangeSubscriber, call.dependentKeys());
+        }
+      }
+
+      @Override public void onFailure(@Nonnull Exception e) {
+        sourceCallback.onFailure(e);
+      }
+    };
   }
 
   private void fetch() {
