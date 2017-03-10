@@ -11,7 +11,7 @@ import com.apollographql.android.impl.util.Utils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RealApolloWatcher<T extends Operation.Data> implements ApolloWatcher<T> {
+final class RealApolloWatcher<T extends Operation.Data> implements ApolloWatcher<T> {
 
   private RealApolloCall<T> activeCall;
   @Nullable private ApolloCall.Callback<T> callback = null;
