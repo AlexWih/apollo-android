@@ -29,7 +29,6 @@ public interface Cache {
 
   Cache NO_CACHE = new Cache() {
 
-
     @Override public void subscribe(RecordChangeSubscriber subscriber, Set<String> dependentKeys) { }
 
     @Override public void unsubscribe(RecordChangeSubscriber subscriber) { }

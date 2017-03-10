@@ -19,11 +19,9 @@ public final class Utils {
     if (setOne == null || setTwo == null) {
       return true;
     }
-    Set<E> smallerSet, largerSet;
-    if (setOne.size() < setTwo.size()) {
-      smallerSet = setOne;
-      largerSet = setTwo;
-    } else {
+    Set<E> smallerSet = setOne;
+    Set<E> largerSet = setTwo;
+    if (setOne.size() > setTwo.size()) {
       smallerSet = setTwo;
       largerSet = setOne;
     }
